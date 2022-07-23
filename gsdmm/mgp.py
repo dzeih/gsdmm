@@ -1,7 +1,12 @@
+import logging
+
 from numpy.random import multinomial
 from numpy import log, exp
 from numpy import argmax
-import json
+
+logging.basicConfig(format='%(asctime)s - %(filename)s:%(lineno)d - %(message)s', level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 
 class MovieGroupProcess:
     def __init__(self, K=8, alpha=0.1, beta=0.1, n_iters=30):
@@ -145,10 +150,10 @@ class MovieGroupProcess:
                     n_z_w[z_new][word] += 1
 
             cluster_count_new = sum([1 for v in m_z if v > 0])
-            print("In stage %d: transferred %d clusters with %d clusters populated" % (
+            logging.info("In stage %d: transferred %d clusters with %d clusters populated" % (
             _iter, total_transfers, cluster_count_new))
             if total_transfers == 0 and cluster_count_new == cluster_count and _iter>25:
-                print("Converged.  Breaking out.")
+                logging.info("Converged.  Breaking out.")
                 break
             cluster_count = cluster_count_new
         self.cluster_word_distribution = n_z_w
