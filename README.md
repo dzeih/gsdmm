@@ -1,26 +1,16 @@
 # GSDMM: Short text clustering
 
-This project implements the Gibbs sampling algorithm for a Dirichlet Mixture Model of [Yin and Wang 2014](https://pdfs.semanticscholar.org/058a/d0815ce350f0e7538e00868c762be78fe5ef.pdf) for the 
-clustering of short text documents. 
-Some advantages of this algorithm:
- - It requires only an upper bound `K` on the number of clusters
- - With good parameter selection, the model converges quickly
- - Space efficient and scalable
+Fork of [rwalk's awesome GSDMM implementation](https://github.com/rwalk/gsdmm), 
+following model of [Yin and Wang 2014](https://pdfs.semanticscholar.org/058a/d0815ce350f0e7538e00868c762be78fe5ef.pdf) for the 
+clustering of short text documents. This fork mainly reduces for loops from the original implementation to get some easy victories 
+with larger document sets, ignoring possible memory requirement explosion.
 
-This project is an easy to read reference implementation of GSDMM -- I don't plan to maintain it unless there is demand. I am however actively maintaining the much faster Rust version of GSDMM [here](https://github.com/rwalk/gsdmm-rust).
+As this uses arrays over lists of dictionaries, it can cut execution time as much as
+ - 97 % with K=300, 26k docs, doc word counts ranging from 4 to 20
+ - With K=300, 2.6M docs, didn't even bother comparing. This runs in ~4 minutes
 
-## The Movie Group Process
-In their paper, the authors introduce a simple conceptual model for explaining the GSDMM called the Movie Group Process.
-
-Imagine a professor is leading a film class. At the start of the class, the students
-are randomly assigned to `K` tables. Before class begins, the students make lists of
-their favorite films. The professor repeatedly reads the class role. Each time the student's name is called,
-the student must select a new table satisfying one or both of the following conditions:
-
-- The new table has more students than the current table.
-- The new table has students with similar lists of favorite movies.
-
-By following these steps consistently, we might expect that the students eventually arrive at an "optimal" table configuration.
+Take it with a grain of salt, the above "benchmarks" were done with an old i5, ignoring all rules of a good benchmark, such as identical init and similar document distribution.
+This may also gain nothing or be even slower than the original with small amounts of clusters and documents. 
 
 ## Usage
 To use a Movie Group Process to cluster short texts, first initialize a [MovieGroupProcess](gsdmm/mgp.py):
@@ -33,7 +23,6 @@ can never return more than `K` clusters.
 
 To fit the model:
 ```python
-y = mgp.fit(docs)
+y = mgp.fit(docs, vocab_size)
 ```
-Each doc in `docs` must be a unique list of tokens found in your short text document. This implementation does not support
-counting tokens with multiplicity (which generally has little value in short text documents).
+where `docs` is list of documents split into lists of tokens, and `vocab_size` the amount of unique tokens over the set.
