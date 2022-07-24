@@ -1,8 +1,7 @@
 import logging
 
 from numpy.random import multinomial
-from numpy import log, exp
-from numpy import argmax
+from numpy import argmax, log, exp
 
 logging.basicConfig(format='%(asctime)s - %(filename)s:%(lineno)d - %(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -46,6 +45,7 @@ class MovieGroupProcess:
         self.cluster_doc_count = [0 for _ in range(K)]
         self.cluster_word_count = [0 for _ in range(K)]
         self.cluster_word_distribution = [{} for i in range(K)]
+        self.sampling_distribution = [1/K for _ in range(K)]
 
     @staticmethod
     def from_data(K, alpha, beta, D, vocab_size, cluster_doc_count, cluster_word_count, cluster_word_distribution):
@@ -78,7 +78,7 @@ class MovieGroupProcess:
         :return: int
             index of randomly selected output
         '''
-        return [i for i, entry in enumerate(multinomial(1, p)) if entry != 0][0]
+        return argmax(multinomial(1, p))
 
     def fit(self, docs, vocab_size):
         '''
@@ -104,7 +104,7 @@ class MovieGroupProcess:
         for i, doc in enumerate(docs):
 
             # choose a random  initial cluster for the doc
-            z = self._sample([1.0 / K for _ in range(K)])
+            z = self._sample(self.sampling_distribution)
             d_z[i] = z
             m_z[z] += 1
             n_z[z] += len(doc)
