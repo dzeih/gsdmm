@@ -199,14 +199,11 @@ class MovieGroupProcess:
         #  lN2 = log(product(n_z_w[w] + beta)) = sum(log(n_z_w[w] + beta))
         #  lD2 = log(product(n_z[d] + V*beta + i -1)) = sum(log(n_z[d] + V*beta + i -1))
 
-        doc_size = len(doc)
-        v_beta = V*beta
-
         lD1 = log(D - 1 + K * alpha)
         lN1 = log(m_z + alpha)
         lN2 = log(n_z_w[:, word_indices] + beta).sum(axis=1)
 
-        n_z_beta = n_z + beta
+        n_z_beta = n_z + V * beta
         lD2 = log(n_z_beta.reshape(K, 1) + doc_size_vector).sum(axis=1)
 
         p = exp(lN1 - lD1 + lN2 - lD2)
